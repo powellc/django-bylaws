@@ -1,0 +1,17 @@
+{% extends "bylaws/base.html" %}
+{% block page-class %}gov{% endblock %}
+{% block title %}{{term}} at {% endblock %}
+
+{% block content %}
+{% load humanize markup typogrify %}
+  <div class="grid_12 page">
+    <h2>Governance</h2>
+  </div>
+
+  {% if object %}
+  <h3>Bylaws</h3>
+  <h4>Adopted {{object.modified|naturalday}}</h4>
+  {{object.rendered_content|typogrify}}
+  {% endif %}
+{% endblock %}
+

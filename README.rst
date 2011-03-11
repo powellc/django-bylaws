@@ -12,3 +12,5 @@ Features
 
 * Require users to "sign" bylaws, or at least sign off that they have scrolled through them.
 * Tracks all changes to bylaws 
+  
+

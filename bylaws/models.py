@@ -1,11 +1,19 @@
 from datetime import *
+from django.conf import settings
 from django.db import models
+from django.contrib.markup.templatetags import markup
+from django.contrib.sites.models import Site
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django_extensions.db.models import TimeStampedModel
+from myutils.models import MarkupMixin
 from simple_history.models import HistoricalRecords
+from bylaws.managers import BylawsManager, AdoptedManager
+from bylaws.utils.diff import textDiff
 
-class Bylaws(TimeStampedModel):
+DEFAULT_DB = getattr(settings, 'ARTICLES_DEFAULT_DB', 'default')
+
+class Bylaws(MarkupMixin, TimeStampedModel):
     '''
     Bylaws model.
     
@@ -22,6 +30,8 @@ class Bylaws(TimeStampedModel):
     slug = models.SlugField(_('Slug'))
     status  = models.CharField(_('Status'), choices=BYLAW_STATUS, default=DRAFT, max_length=1)
     content = models.TextField(_('Content'))
+    rendered_content = models.TextField(_('Rendered content'), blank=True)
+    sites = models.ManyToManyField(Site)
     history = HistoricalRecords()
 
     objects = BylawsManager()
@@ -30,15 +40,19 @@ class Bylaws(TimeStampedModel):
     class Meta:
         verbose_name = _('Bylaws')
         verbose_name_plural = _('Bylaws')
-        ordering = ('status', '-modified',)
-        get_latest_by='-modified'
+        ordering = ('status', 'modified',)
+        get_latest_by='modified'
     
+    class MarkupOptions:
+        source_field = 'content'
+        rendered_field = 'rendered_content'
+
     def __unicode__(self):
         return self.title
-
+    
     @models.permalink
     def get_absolute_url(self):
-        return ('by-bylaws-detail', None, {'slug': self.slug})
+        return ('by-bylaws-detail', None, {'year_month_slug': self.modified.year + '-' + self.modified.month})
     
     @property
     def adopted(self): # Find the most recently adopted version of a set of bylaws
@@ -47,9 +61,11 @@ class Bylaws(TimeStampedModel):
                 return b
         return None
 
-    @property
-    def diff(self, past_bylaws):
-        return 'Call diff from cli on self and the past_bylaws'
+    def diff(self, past_bylaws=None):
+        if past_bylaws:
+            return textDiff(self.rendered_content, past_bylaws.rendered_content)
+        else:
+            return self.rendered_content
 
 class UserSignature(TimeStampedModel):
     '''User signature model
