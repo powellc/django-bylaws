@@ -15,5 +15,6 @@ urlpatterns = patterns('',
     url(r'^current/$', current_bylaws, name="by-bylaws-current"),
     url(r'^(?P<year_month_slug>[-\d]+)/$', bylaws_diff_list, name="by-bylaws-diff-list"),
     url(r'^(?P<year_month_slug>[-\d]+)/diff/(?P<version_id>[\d]+)/$', bylaws_diff_detail, name="by-bylaws-diff-detail"),
+    url(r'^(?P<year_month_slug>[-\d]+)/diff/(?P<version_id>[\d]+)/to/(?P<second_version_id>[\d]+)/$', bylaws_diff_detail, name="by-bylaws-diff-detail"),
 )
 
