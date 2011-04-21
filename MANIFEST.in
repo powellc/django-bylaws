@@ -1,0 +1,3 @@
+include README.md
+recursive-include bylaws/utils *
+recursive-include bylaws/templates *
